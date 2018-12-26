@@ -25,16 +25,17 @@ func init() {
 	orm.RegisterModel(new(Students))
 }
 
-func GetAllStudents() []*Students {
+func GetStudentsBySchool(school_id int) []*Students {
+	//通过school_id和openid获取学生
 	var students []*Students
 	o := orm.NewOrm()
-	o.QueryTable("students").All(&students)
+	//openid需要获取用户的openid
+	o.QueryTable("students").Filter("school_id", school_id).Filter("openid", "123123").All(&students)
 	return students
 }
 
 func InsertStudent(student *Students) bool {
 	o := orm.NewOrm()
-	fmt.Printf("传入的学生对象是：%v", student)
 	_, err := o.Insert(student)
 	if err == nil {
 		return true
@@ -44,11 +45,25 @@ func InsertStudent(student *Students) bool {
 
 }
 
-func UpdateStudent() bool {
-	return true
+func UpdateStudent(student *Students) bool {
+	o := orm.NewOrm()
+	if o.Read(&Students{Id: student.Id}) == nil {
+		if _, err := o.Update(student); err == nil {
+			return true
+		} else {
+			fmt.Printf("error is : %v", err)
+			return false
+		}
+	}
+	return false
 }
 
-func DeleteStudent() bool {
-
-	return true
+func DeleteStudent(id int) bool {
+	o := orm.NewOrm()
+	if _, err := o.Delete(&Students{Id: id}); err == nil {
+		return true
+	} else {
+		fmt.Printf("error is : %v", err)
+		return false
+	}
 }
